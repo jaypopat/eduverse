@@ -19,3 +19,5 @@ log = "0.4.22"
 env_logger = "0.11.5"
 futures = "0.3.31"
 codec = { package = "parity-scale-codec", version = "3.0.0", features = ["derive"] }
+mediasoup = "0.17.1"
+num_cpus = "1.16.0"

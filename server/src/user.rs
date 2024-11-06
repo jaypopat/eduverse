@@ -1,7 +1,13 @@
+use std::collections::HashMap;
 use std::sync::Arc;
 
-use crate::room_manager::RoomManager;
-use futures_util::StreamExt;
+use futures_util::{SinkExt, StreamExt};
+use mediasoup::consumer::Consumer;
+use mediasoup::data_structures::{DtlsParameters, IceCandidate, IceParameters};
+use mediasoup::prelude::{MediaKind, RtpParameters};
+use mediasoup::producer::Producer;
+use mediasoup::rtp_parameters::RtcpParameters;
+use mediasoup::webrtc_transport::WebRtcTransport;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 use sp_core::{sr25519, ByteArray, Pair};
@@ -9,27 +15,28 @@ use tokio::net::TcpStream;
 use tokio::sync::Mutex;
 use tokio_tungstenite::WebSocketStream;
 
+use crate::room_manager::RoomManager;
+use crate::ws_payload::{
+    ConsumePayload, JoinPayload, MovementPayload, ProducePayload, ResumePayload, TransportOptions,
+};
+
 pub struct User {
     pub(crate) id: Option<String>,
     room_id: Option<u32>,
     coordinates: (i32, i32),
     pub websocket: WebSocketStream<TcpStream>,
+    transport: Option<WebRtcTransport>,
+    // Track what this user is broadcasting
+    producers: HashMap<String, Producer>,
+    // Track what this user is receiving
+    consumers: HashMap<String, Consumer>,
+    audio_range: f32,
 }
-#[derive(Serialize, Deserialize)]
-struct MovementPayload {
-    x: i32,
-    y: i32,
-}
-#[derive(Deserialize)]
-struct JoinPayload {
-    course_id: u32,
-    pub_address: String,
-    signature: String,
-    message_signed: String,
-}
+
 #[derive(Deserialize)]
 #[serde(tag = "type", content = "payload")]
 enum UserAction {
+    // canvas movement/join/leave/send-message actions
     #[serde(rename = "join")]
     JoinRoom(JoinPayload),
     #[serde(rename = "leave")]
@@ -38,6 +45,19 @@ enum UserAction {
     MoveTo(MovementPayload),
     #[serde(rename = "send_message")]
     SendMessage(String),
+
+    // webrtc actions
+    #[serde(rename = "webrtc_init")]
+    InitializeWebRTC, // client initializes a webrtc connection and the transporter
+    #[serde(rename = "connect_transport")]
+    // client connects to the sfu establishes a transport connection
+    ConnectTransport(TransportOptions),
+    #[serde(rename = "produce")] // when client wants to send video/audio to the sfu
+    Produce(ProducePayload),
+    #[serde(rename = "consume")] // when client wants to receive video/audio from the sfu
+    Consume(ConsumePayload),
+    #[serde(rename = "resume")]
+    Resume(ResumePayload), // if the user paused a video to focus on audio-only, Resume would let them start receiving the video stream again.
 }
 impl User {
     pub fn new(websocket: WebSocketStream<TcpStream>) -> Self {
@@ -46,6 +66,10 @@ impl User {
             room_id: None,
             coordinates: (0, 0),
             websocket,
+            transport: None,
+            producers: HashMap::new(),
+            consumers: HashMap::new(),
+            audio_range: 50.0,
         }
     }
     pub async fn handle_ws_actions(user_arc: Arc<Mutex<Self>>) {
@@ -71,6 +95,26 @@ impl User {
                                 }
                                 UserAction::SendMessage(message) => {
                                     Self::handle_send_message(user_arc.clone(), message).await;
+                                }
+
+                                UserAction::ConnectTransport(transport_options) => {
+                                    Self::handle_connect_transport(
+                                        user_arc.clone(),
+                                        transport_options,
+                                    )
+                                    .await;
+                                }
+                                UserAction::Produce(produce_payload) => {
+                                    Self::handle_produce(user_arc.clone(), produce_payload).await;
+                                }
+                                UserAction::Consume(consumePayload) => {
+                                    Self::handle_consume(user_arc.clone(), consumePayload).await;
+                                }
+                                UserAction::Resume(resumePayload) => {
+                                    Self::handle_resume(user_arc.clone(), resumePayload).await;
+                                }
+                                UserAction::InitializeWebRTC => {
+                                    Self::handle_webrtc_init(user_arc.clone()).await;
                                 }
                             },
                             Err(e) => println!("Failed to parse message: {}", e),
@@ -104,6 +148,10 @@ impl User {
             eprintln!("Signature verification failed: {}", e);
             return;
         }
+
+        // TODO check if user is enrolled by calling is_enrolled view function in smart contract
+        // const isEnrolled = contract.query.isEnrolled(course_id, pub_address);
+        // if(!isEnrolled) eprintln!("You havent enrolled in: {}", e); return;
 
         let mut user = user_arc.lock().await;
         if user.id.is_none() {
@@ -189,6 +237,26 @@ impl User {
             }
         }
     }
+    async fn handle_connect_transport(
+        user_arc: Arc<Mutex<Self>>,
+        transport_options: TransportOptions,
+    ) {
+        let mut user = user_arc.lock().await;
+
+        unimplemented!("Connect transport not implemented yet");
+    }
+    async fn handle_webrtc_init(user_arc: Arc<Mutex<Self>>) {
+        unimplemented!("WebRTC not implemented yet");
+    }
+    async fn handle_produce(user_arc: Arc<Mutex<Self>>, produce_payload: ProducePayload) {
+        unimplemented!("Produce not implemented yet");
+    }
+    async fn handle_consume(user_arc: Arc<Mutex<Self>>, consume_payload: ConsumePayload) {
+        unimplemented!("Consume not implemented yet");
+    }
+    async fn handle_resume(user_arc: Arc<Mutex<Self>>, consumer_id: ResumePayload) {
+        unimplemented!("Resume not implemented yet");
+    }
 
     async fn handle_send_message(user_arc: Arc<Mutex<Self>>, message: String) {
         let (room_id, user_id) = {
@@ -236,4 +304,14 @@ fn verify_signature(
 fn get_rand_coordinates() -> (i32, i32) {
     let mut rng = rand::thread_rng();
     (rng.gen_range(0..100), rng.gen_range(0..100))
+}
+impl Drop for User {
+    fn drop(&mut self) {
+        self.producers.clear();
+        self.consumers.clear();
+
+        if let Some(mut transport) = self.transport.take() {
+            let _ = transport.close();
+        }
+    }
 }
