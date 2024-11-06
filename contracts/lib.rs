@@ -201,6 +201,17 @@ mod eduverse {
         pub fn get_teacher_courses(&self, teacher: AccountId) -> Vec<u32> {
             self.teacher_courses.get(teacher).unwrap_or_default()
         }
+        // get all courses
+        #[ink(message)]
+        pub fn get_all_courses(&self) -> Vec<Course> {
+            let mut all_courses = Vec::new();
+            for i in 0..self.course_counter {
+                if let Some(course) = self.courses.get(i) {
+                    all_courses.push(course);
+                }
+            }
+            all_courses
+        }
     }
 
     /// Unit tests in Rust are normally defined within such a `#[cfg(test)]`

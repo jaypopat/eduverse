@@ -1,0 +1,1629 @@
+{
+  "source": {
+    "hash": "0x841d690c872e9282df92db6485c4e3f9aee1853ba4d6a1d1c2051118cc828bed",
+    "language": "ink! 5.0.0",
+    "compiler": "rustc 1.80.1",
+    "build_info": {
+      "rust_toolchain": "stable-x86_64-unknown-linux-gnu",
+      "cargo_contract_version": "4.1.1",
+      "build_mode": "Debug",
+      "wasm_opt_settings": {
+        "optimization_passes": "Z",
+        "keep_debug_symbols": false
+      }
+    }
+  },
+  "contract": {
+    "name": "contracts",
+    "version": "0.1.0",
+    "authors": [
+      "[your_name] <[your_email]>"
+    ]
+  },
+  "image": null,
+  "version": 5,
+  "types": [
+    {
+      "id": 0,
+      "type": {
+        "def": {
+          "primitive": "u32"
+        }
+      }
+    },
+    {
+      "id": 1,
+      "type": {
+        "path": [
+          "ink_primitives",
+          "types",
+          "AccountId"
+        ],
+        "def": {
+          "composite": {
+            "fields": [
+              {
+                "type": 2,
+                "typeName": "[u8; 32]"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "type": {
+        "def": {
+          "array": {
+            "len": 32,
+            "type": 3
+          }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "type": {
+        "def": {
+          "primitive": "u8"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "type": {
+        "def": {
+          "sequence": {
+            "type": 3
+          }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "type": {
+        "def": {
+          "primitive": "u64"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "type": {
+        "def": {
+          "primitive": "u128"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "type": {
+        "def": {
+          "primitive": "bool"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "type": {
+        "path": [
+          "ink_storage",
+          "lazy",
+          "mapping",
+          "Mapping"
+        ],
+        "params": [
+          {
+            "name": "K",
+            "type": 0
+          },
+          {
+            "name": "V",
+            "type": 9
+          },
+          {
+            "name": "KeyType",
+            "type": 10
+          }
+        ],
+        "def": {
+          "composite": {}
+        }
+      }
+    },
+    {
+      "id": 9,
+      "type": {
+        "path": [
+          "contracts",
+          "eduverse",
+          "Course"
+        ],
+        "def": {
+          "composite": {
+            "fields": [
+              {
+                "name": "id",
+                "type": 0,
+                "typeName": "u32"
+              },
+              {
+                "name": "teacher",
+                "type": 1,
+                "typeName": "AccountId"
+              },
+              {
+                "name": "title",
+                "type": 4,
+                "typeName": "Vec<u8>"
+              },
+              {
+                "name": "description",
+                "type": 4,
+                "typeName": "Vec<u8>"
+              },
+              {
+                "name": "max_students",
+                "type": 0,
+                "typeName": "u32"
+              },
+              {
+                "name": "enrolled_count",
+                "type": 0,
+                "typeName": "u32"
+              },
+              {
+                "name": "start_time",
+                "type": 5,
+                "typeName": "Timestamp"
+              },
+              {
+                "name": "end_time",
+                "type": 5,
+                "typeName": "Timestamp"
+              },
+              {
+                "name": "price",
+                "type": 6,
+                "typeName": "Balance"
+              },
+              {
+                "name": "active",
+                "type": 7,
+                "typeName": "bool"
+              },
+              {
+                "name": "metadata_hash",
+                "type": 4,
+                "typeName": "Vec<u8>"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 10,
+      "type": {
+        "path": [
+          "ink_storage_traits",
+          "impls",
+          "ResolverKey"
+        ],
+        "params": [
+          {
+            "name": "L",
+            "type": 11
+          },
+          {
+            "name": "R",
+            "type": 12
+          }
+        ],
+        "def": {
+          "composite": {}
+        }
+      }
+    },
+    {
+      "id": 11,
+      "type": {
+        "path": [
+          "ink_storage_traits",
+          "impls",
+          "AutoKey"
+        ],
+        "def": {
+          "composite": {}
+        }
+      }
+    },
+    {
+      "id": 12,
+      "type": {
+        "path": [
+          "ink_storage_traits",
+          "impls",
+          "ManualKey"
+        ],
+        "params": [
+          {
+            "name": "ParentKey",
+            "type": 13
+          }
+        ],
+        "def": {
+          "composite": {}
+        }
+      }
+    },
+    {
+      "id": 13,
+      "type": {
+        "def": {
+          "tuple": []
+        }
+      }
+    },
+    {
+      "id": 14,
+      "type": {
+        "def": {
+          "sequence": {
+            "type": 0
+          }
+        }
+      }
+    },
+    {
+      "id": 15,
+      "type": {
+        "path": [
+          "ink_storage",
+          "lazy",
+          "mapping",
+          "Mapping"
+        ],
+        "params": [
+          {
+            "name": "K",
+            "type": 1
+          },
+          {
+            "name": "V",
+            "type": 14
+          },
+          {
+            "name": "KeyType",
+            "type": 16
+          }
+        ],
+        "def": {
+          "composite": {}
+        }
+      }
+    },
+    {
+      "id": 16,
+      "type": {
+        "path": [
+          "ink_storage_traits",
+          "impls",
+          "ResolverKey"
+        ],
+        "params": [
+          {
+            "name": "L",
+            "type": 11
+          },
+          {
+            "name": "R",
+            "type": 17
+          }
+        ],
+        "def": {
+          "composite": {}
+        }
+      }
+    },
+    {
+      "id": 17,
+      "type": {
+        "path": [
+          "ink_storage_traits",
+          "impls",
+          "ManualKey"
+        ],
+        "params": [
+          {
+            "name": "ParentKey",
+            "type": 13
+          }
+        ],
+        "def": {
+          "composite": {}
+        }
+      }
+    },
+    {
+      "id": 18,
+      "type": {
+        "path": [
+          "ink_storage",
+          "lazy",
+          "mapping",
+          "Mapping"
+        ],
+        "params": [
+          {
+            "name": "K",
+            "type": 1
+          },
+          {
+            "name": "V",
+            "type": 14
+          },
+          {
+            "name": "KeyType",
+            "type": 19
+          }
+        ],
+        "def": {
+          "composite": {}
+        }
+      }
+    },
+    {
+      "id": 19,
+      "type": {
+        "path": [
+          "ink_storage_traits",
+          "impls",
+          "ResolverKey"
+        ],
+        "params": [
+          {
+            "name": "L",
+            "type": 11
+          },
+          {
+            "name": "R",
+            "type": 20
+          }
+        ],
+        "def": {
+          "composite": {}
+        }
+      }
+    },
+    {
+      "id": 20,
+      "type": {
+        "path": [
+          "ink_storage_traits",
+          "impls",
+          "ManualKey"
+        ],
+        "params": [
+          {
+            "name": "ParentKey",
+            "type": 13
+          }
+        ],
+        "def": {
+          "composite": {}
+        }
+      }
+    },
+    {
+      "id": 21,
+      "type": {
+        "def": {
+          "sequence": {
+            "type": 1
+          }
+        }
+      }
+    },
+    {
+      "id": 22,
+      "type": {
+        "path": [
+          "ink_storage",
+          "lazy",
+          "mapping",
+          "Mapping"
+        ],
+        "params": [
+          {
+            "name": "K",
+            "type": 0
+          },
+          {
+            "name": "V",
+            "type": 21
+          },
+          {
+            "name": "KeyType",
+            "type": 23
+          }
+        ],
+        "def": {
+          "composite": {}
+        }
+      }
+    },
+    {
+      "id": 23,
+      "type": {
+        "path": [
+          "ink_storage_traits",
+          "impls",
+          "ResolverKey"
+        ],
+        "params": [
+          {
+            "name": "L",
+            "type": 11
+          },
+          {
+            "name": "R",
+            "type": 24
+          }
+        ],
+        "def": {
+          "composite": {}
+        }
+      }
+    },
+    {
+      "id": 24,
+      "type": {
+        "path": [
+          "ink_storage_traits",
+          "impls",
+          "ManualKey"
+        ],
+        "params": [
+          {
+            "name": "ParentKey",
+            "type": 13
+          }
+        ],
+        "def": {
+          "composite": {}
+        }
+      }
+    },
+    {
+      "id": 25,
+      "type": {
+        "path": [
+          "contracts",
+          "eduverse",
+          "Eduverse"
+        ],
+        "def": {
+          "composite": {
+            "fields": [
+              {
+                "name": "course_counter",
+                "type": 0,
+                "typeName": "<u32 as::ink::storage::traits::AutoStorableHint<::ink::storage\n::traits::ManualKey<2561085401u32, ()>,>>::Type"
+              },
+              {
+                "name": "courses",
+                "type": 8,
+                "typeName": "<Mapping<u32, Course> as::ink::storage::traits::AutoStorableHint<\n::ink::storage::traits::ManualKey<426687947u32, ()>,>>::Type"
+              },
+              {
+                "name": "student_enrollments",
+                "type": 15,
+                "typeName": "<Mapping<AccountId, Vec<u32>> as::ink::storage::traits::\nAutoStorableHint<::ink::storage::traits::ManualKey<1639059346u32,\n()>,>>::Type"
+              },
+              {
+                "name": "teacher_courses",
+                "type": 18,
+                "typeName": "<Mapping<AccountId, Vec<u32>> as::ink::storage::traits::\nAutoStorableHint<::ink::storage::traits::ManualKey<1104045018u32,\n()>,>>::Type"
+              },
+              {
+                "name": "course_students",
+                "type": 22,
+                "typeName": "<Mapping<u32, Vec<AccountId>> as::ink::storage::traits::\nAutoStorableHint<::ink::storage::traits::ManualKey<1588938612u32,\n()>,>>::Type"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 26,
+      "type": {
+        "path": [
+          "Result"
+        ],
+        "params": [
+          {
+            "name": "T",
+            "type": 13
+          },
+          {
+            "name": "E",
+            "type": 27
+          }
+        ],
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "name": "Ok",
+                "fields": [
+                  {
+                    "type": 13
+                  }
+                ],
+                "index": 0
+              },
+              {
+                "name": "Err",
+                "fields": [
+                  {
+                    "type": 27
+                  }
+                ],
+                "index": 1
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 27,
+      "type": {
+        "path": [
+          "ink_primitives",
+          "LangError"
+        ],
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "name": "CouldNotReadInput",
+                "index": 1
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 28,
+      "type": {
+        "path": [
+          "Result"
+        ],
+        "params": [
+          {
+            "name": "T",
+            "type": 29
+          },
+          {
+            "name": "E",
+            "type": 27
+          }
+        ],
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "name": "Ok",
+                "fields": [
+                  {
+                    "type": 29
+                  }
+                ],
+                "index": 0
+              },
+              {
+                "name": "Err",
+                "fields": [
+                  {
+                    "type": 27
+                  }
+                ],
+                "index": 1
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 29,
+      "type": {
+        "path": [
+          "Result"
+        ],
+        "params": [
+          {
+            "name": "T",
+            "type": 0
+          },
+          {
+            "name": "E",
+            "type": 30
+          }
+        ],
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "name": "Ok",
+                "fields": [
+                  {
+                    "type": 0
+                  }
+                ],
+                "index": 0
+              },
+              {
+                "name": "Err",
+                "fields": [
+                  {
+                    "type": 30
+                  }
+                ],
+                "index": 1
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 30,
+      "type": {
+        "path": [
+          "contracts",
+          "eduverse",
+          "Error"
+        ],
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "name": "CourseNotFound",
+                "index": 0
+              },
+              {
+                "name": "CourseIsFull",
+                "index": 1
+              },
+              {
+                "name": "AlreadyEnrolled",
+                "index": 2
+              },
+              {
+                "name": "NotEnrolled",
+                "index": 3
+              },
+              {
+                "name": "InsufficientPayment",
+                "index": 4
+              },
+              {
+                "name": "Unauthorized",
+                "index": 5
+              },
+              {
+                "name": "CourseNotActive",
+                "index": 6
+              },
+              {
+                "name": "InvalidTime",
+                "index": 7
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 31,
+      "type": {
+        "path": [
+          "Result"
+        ],
+        "params": [
+          {
+            "name": "T",
+            "type": 32
+          },
+          {
+            "name": "E",
+            "type": 27
+          }
+        ],
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "name": "Ok",
+                "fields": [
+                  {
+                    "type": 32
+                  }
+                ],
+                "index": 0
+              },
+              {
+                "name": "Err",
+                "fields": [
+                  {
+                    "type": 27
+                  }
+                ],
+                "index": 1
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 32,
+      "type": {
+        "path": [
+          "Result"
+        ],
+        "params": [
+          {
+            "name": "T",
+            "type": 13
+          },
+          {
+            "name": "E",
+            "type": 30
+          }
+        ],
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "name": "Ok",
+                "fields": [
+                  {
+                    "type": 13
+                  }
+                ],
+                "index": 0
+              },
+              {
+                "name": "Err",
+                "fields": [
+                  {
+                    "type": 30
+                  }
+                ],
+                "index": 1
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 33,
+      "type": {
+        "path": [
+          "Result"
+        ],
+        "params": [
+          {
+            "name": "T",
+            "type": 7
+          },
+          {
+            "name": "E",
+            "type": 27
+          }
+        ],
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "name": "Ok",
+                "fields": [
+                  {
+                    "type": 7
+                  }
+                ],
+                "index": 0
+              },
+              {
+                "name": "Err",
+                "fields": [
+                  {
+                    "type": 27
+                  }
+                ],
+                "index": 1
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 34,
+      "type": {
+        "path": [
+          "Result"
+        ],
+        "params": [
+          {
+            "name": "T",
+            "type": 35
+          },
+          {
+            "name": "E",
+            "type": 27
+          }
+        ],
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "name": "Ok",
+                "fields": [
+                  {
+                    "type": 35
+                  }
+                ],
+                "index": 0
+              },
+              {
+                "name": "Err",
+                "fields": [
+                  {
+                    "type": 27
+                  }
+                ],
+                "index": 1
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 35,
+      "type": {
+        "path": [
+          "Option"
+        ],
+        "params": [
+          {
+            "name": "T",
+            "type": 9
+          }
+        ],
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "name": "None",
+                "index": 0
+              },
+              {
+                "name": "Some",
+                "fields": [
+                  {
+                    "type": 9
+                  }
+                ],
+                "index": 1
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 36,
+      "type": {
+        "path": [
+          "Result"
+        ],
+        "params": [
+          {
+            "name": "T",
+            "type": 14
+          },
+          {
+            "name": "E",
+            "type": 27
+          }
+        ],
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "name": "Ok",
+                "fields": [
+                  {
+                    "type": 14
+                  }
+                ],
+                "index": 0
+              },
+              {
+                "name": "Err",
+                "fields": [
+                  {
+                    "type": 27
+                  }
+                ],
+                "index": 1
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 37,
+      "type": {
+        "path": [
+          "Result"
+        ],
+        "params": [
+          {
+            "name": "T",
+            "type": 38
+          },
+          {
+            "name": "E",
+            "type": 27
+          }
+        ],
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "name": "Ok",
+                "fields": [
+                  {
+                    "type": 38
+                  }
+                ],
+                "index": 0
+              },
+              {
+                "name": "Err",
+                "fields": [
+                  {
+                    "type": 27
+                  }
+                ],
+                "index": 1
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 38,
+      "type": {
+        "def": {
+          "sequence": {
+            "type": 9
+          }
+        }
+      }
+    },
+    {
+      "id": 39,
+      "type": {
+        "path": [
+          "ink_primitives",
+          "types",
+          "Hash"
+        ],
+        "def": {
+          "composite": {
+            "fields": [
+              {
+                "type": 2,
+                "typeName": "[u8; 32]"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 40,
+      "type": {
+        "path": [
+          "ink_env",
+          "types",
+          "NoChainExtension"
+        ],
+        "def": {
+          "variant": {}
+        }
+      }
+    }
+  ],
+  "storage": {
+    "root": {
+      "root_key": "0x00000000",
+      "layout": {
+        "struct": {
+          "name": "Eduverse",
+          "fields": [
+            {
+              "name": "course_counter",
+              "layout": {
+                "leaf": {
+                  "key": "0x00000000",
+                  "ty": 0
+                }
+              }
+            },
+            {
+              "name": "courses",
+              "layout": {
+                "root": {
+                  "root_key": "0xcbbd6e19",
+                  "layout": {
+                    "struct": {
+                      "name": "Course",
+                      "fields": [
+                        {
+                          "name": "id",
+                          "layout": {
+                            "leaf": {
+                              "key": "0xcbbd6e19",
+                              "ty": 0
+                            }
+                          }
+                        },
+                        {
+                          "name": "teacher",
+                          "layout": {
+                            "leaf": {
+                              "key": "0xcbbd6e19",
+                              "ty": 1
+                            }
+                          }
+                        },
+                        {
+                          "name": "title",
+                          "layout": {
+                            "leaf": {
+                              "key": "0xcbbd6e19",
+                              "ty": 4
+                            }
+                          }
+                        },
+                        {
+                          "name": "description",
+                          "layout": {
+                            "leaf": {
+                              "key": "0xcbbd6e19",
+                              "ty": 4
+                            }
+                          }
+                        },
+                        {
+                          "name": "max_students",
+                          "layout": {
+                            "leaf": {
+                              "key": "0xcbbd6e19",
+                              "ty": 0
+                            }
+                          }
+                        },
+                        {
+                          "name": "enrolled_count",
+                          "layout": {
+                            "leaf": {
+                              "key": "0xcbbd6e19",
+                              "ty": 0
+                            }
+                          }
+                        },
+                        {
+                          "name": "start_time",
+                          "layout": {
+                            "leaf": {
+                              "key": "0xcbbd6e19",
+                              "ty": 5
+                            }
+                          }
+                        },
+                        {
+                          "name": "end_time",
+                          "layout": {
+                            "leaf": {
+                              "key": "0xcbbd6e19",
+                              "ty": 5
+                            }
+                          }
+                        },
+                        {
+                          "name": "price",
+                          "layout": {
+                            "leaf": {
+                              "key": "0xcbbd6e19",
+                              "ty": 6
+                            }
+                          }
+                        },
+                        {
+                          "name": "active",
+                          "layout": {
+                            "leaf": {
+                              "key": "0xcbbd6e19",
+                              "ty": 7
+                            }
+                          }
+                        },
+                        {
+                          "name": "metadata_hash",
+                          "layout": {
+                            "leaf": {
+                              "key": "0xcbbd6e19",
+                              "ty": 4
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "ty": 8
+                }
+              }
+            },
+            {
+              "name": "student_enrollments",
+              "layout": {
+                "root": {
+                  "root_key": "0x920fb261",
+                  "layout": {
+                    "leaf": {
+                      "key": "0x920fb261",
+                      "ty": 14
+                    }
+                  },
+                  "ty": 15
+                }
+              }
+            },
+            {
+              "name": "teacher_courses",
+              "layout": {
+                "root": {
+                  "root_key": "0xda63ce41",
+                  "layout": {
+                    "leaf": {
+                      "key": "0xda63ce41",
+                      "ty": 14
+                    }
+                  },
+                  "ty": 18
+                }
+              }
+            },
+            {
+              "name": "course_students",
+              "layout": {
+                "root": {
+                  "root_key": "0x7447b55e",
+                  "layout": {
+                    "leaf": {
+                      "key": "0x7447b55e",
+                      "ty": 21
+                    }
+                  },
+                  "ty": 22
+                }
+              }
+            }
+          ]
+        }
+      },
+      "ty": 25
+    }
+  },
+  "spec": {
+    "constructors": [
+      {
+        "label": "new",
+        "selector": "0x9bae9d5e",
+        "payable": false,
+        "args": [],
+        "returnType": {
+          "type": 26,
+          "displayName": [
+            "ink_primitives",
+            "ConstructorResult"
+          ]
+        },
+        "docs": [],
+        "default": false
+      }
+    ],
+    "messages": [
+      {
+        "label": "create_course",
+        "selector": "0xc75902bc",
+        "mutates": true,
+        "payable": false,
+        "args": [
+          {
+            "label": "title",
+            "type": {
+              "type": 4,
+              "displayName": [
+                "Vec"
+              ]
+            }
+          },
+          {
+            "label": "description",
+            "type": {
+              "type": 4,
+              "displayName": [
+                "Vec"
+              ]
+            }
+          },
+          {
+            "label": "max_students",
+            "type": {
+              "type": 0,
+              "displayName": [
+                "u32"
+              ]
+            }
+          },
+          {
+            "label": "start_time",
+            "type": {
+              "type": 5,
+              "displayName": [
+                "Timestamp"
+              ]
+            }
+          },
+          {
+            "label": "end_time",
+            "type": {
+              "type": 5,
+              "displayName": [
+                "Timestamp"
+              ]
+            }
+          },
+          {
+            "label": "price",
+            "type": {
+              "type": 6,
+              "displayName": [
+                "Balance"
+              ]
+            }
+          },
+          {
+            "label": "metadata_hash",
+            "type": {
+              "type": 4,
+              "displayName": [
+                "Vec"
+              ]
+            }
+          }
+        ],
+        "returnType": {
+          "type": 28,
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ]
+        },
+        "docs": [],
+        "default": false
+      },
+      {
+        "label": "enroll",
+        "selector": "0x8c18306a",
+        "mutates": true,
+        "payable": true,
+        "args": [
+          {
+            "label": "course_id",
+            "type": {
+              "type": 0,
+              "displayName": [
+                "u32"
+              ]
+            }
+          }
+        ],
+        "returnType": {
+          "type": 31,
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ]
+        },
+        "docs": [],
+        "default": false
+      },
+      {
+        "label": "verify_enrollment",
+        "selector": "0x4b7c20d8",
+        "mutates": false,
+        "payable": false,
+        "args": [
+          {
+            "label": "student",
+            "type": {
+              "type": 1,
+              "displayName": [
+                "AccountId"
+              ]
+            }
+          },
+          {
+            "label": "course_id",
+            "type": {
+              "type": 0,
+              "displayName": [
+                "u32"
+              ]
+            }
+          }
+        ],
+        "returnType": {
+          "type": 33,
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ]
+        },
+        "docs": [
+          " Verify if a student is enrolled in a course"
+        ],
+        "default": false
+      },
+      {
+        "label": "get_course",
+        "selector": "0x2553bbb2",
+        "mutates": false,
+        "payable": false,
+        "args": [
+          {
+            "label": "course_id",
+            "type": {
+              "type": 0,
+              "displayName": [
+                "u32"
+              ]
+            }
+          }
+        ],
+        "returnType": {
+          "type": 34,
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ]
+        },
+        "docs": [
+          " Get course details"
+        ],
+        "default": false
+      },
+      {
+        "label": "get_student_courses",
+        "selector": "0xd7691439",
+        "mutates": false,
+        "payable": false,
+        "args": [
+          {
+            "label": "student",
+            "type": {
+              "type": 1,
+              "displayName": [
+                "AccountId"
+              ]
+            }
+          }
+        ],
+        "returnType": {
+          "type": 36,
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ]
+        },
+        "docs": [
+          " Get student's enrolled courses"
+        ],
+        "default": false
+      },
+      {
+        "label": "get_teacher_courses",
+        "selector": "0x2e80cb06",
+        "mutates": false,
+        "payable": false,
+        "args": [
+          {
+            "label": "teacher",
+            "type": {
+              "type": 1,
+              "displayName": [
+                "AccountId"
+              ]
+            }
+          }
+        ],
+        "returnType": {
+          "type": 36,
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ]
+        },
+        "docs": [
+          " Get teacher's courses"
+        ],
+        "default": false
+      },
+      {
+        "label": "get_all_courses",
+        "selector": "0xe187628f",
+        "mutates": false,
+        "payable": false,
+        "args": [],
+        "returnType": {
+          "type": 37,
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ]
+        },
+        "docs": [],
+        "default": false
+      }
+    ],
+    "events": [
+      {
+        "label": "CourseCreated",
+        "module_path": "contracts::eduverse",
+        "signature_topic": "0x7f569b8d80d7eb685bfebc5751d7f87fbf97d284f26472be03d69c60c5602575",
+        "args": [
+          {
+            "label": "course_id",
+            "indexed": true,
+            "type": {
+              "type": 0,
+              "displayName": [
+                "u32"
+              ]
+            },
+            "docs": []
+          },
+          {
+            "label": "teacher",
+            "indexed": true,
+            "type": {
+              "type": 1,
+              "displayName": [
+                "AccountId"
+              ]
+            },
+            "docs": []
+          },
+          {
+            "label": "title",
+            "indexed": false,
+            "type": {
+              "type": 4,
+              "displayName": [
+                "Vec"
+              ]
+            },
+            "docs": []
+          }
+        ],
+        "docs": []
+      },
+      {
+        "label": "StudentEnrolled",
+        "module_path": "contracts::eduverse",
+        "signature_topic": "0x4157fe48e6b2f8fb4a518ad7cd2fb7cc1b4c72fe285ed50083148a2e284cfe99",
+        "args": [
+          {
+            "label": "course_id",
+            "indexed": true,
+            "type": {
+              "type": 0,
+              "displayName": [
+                "u32"
+              ]
+            },
+            "docs": []
+          },
+          {
+            "label": "student",
+            "indexed": true,
+            "type": {
+              "type": 1,
+              "displayName": [
+                "AccountId"
+              ]
+            },
+            "docs": []
+          }
+        ],
+        "docs": []
+      }
+    ],
+    "docs": [],
+    "lang_error": {
+      "type": 27,
+      "displayName": [
+        "ink",
+        "LangError"
+      ]
+    },
+    "environment": {
+      "accountId": {
+        "type": 1,
+        "displayName": [
+          "AccountId"
+        ]
+      },
+      "balance": {
+        "type": 6,
+        "displayName": [
+          "Balance"
+        ]
+      },
+      "hash": {
+        "type": 39,
+        "displayName": [
+          "Hash"
+        ]
+      },
+      "timestamp": {
+        "type": 5,
+        "displayName": [
+          "Timestamp"
+        ]
+      },
+      "blockNumber": {
+        "type": 0,
+        "displayName": [
+          "BlockNumber"
+        ]
+      },
+      "chainExtension": {
+        "type": 40,
+        "displayName": [
+          "ChainExtension"
+        ]
+      },
+      "maxEventTopics": 4,
+      "staticBufferSize": 16384
+    }
+  }
+}
