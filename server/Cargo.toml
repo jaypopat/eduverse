@@ -21,3 +21,6 @@ futures = "0.3.31"
 codec = { package = "parity-scale-codec", version = "3.0.0", features = ["derive"] }
 mediasoup = "0.17.1"
 num_cpus = "1.16.0"
+event-listener = "5.3.1"
+blake2 = "0.10.6"
+parking_lot = "0.12.3"

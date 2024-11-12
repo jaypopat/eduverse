@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::num::{NonZeroU32, NonZeroU8};
 use std::sync::Arc;
-
+use std::time::Duration;
 use futures_util::SinkExt;
 use lazy_static::lazy_static;
 use mediasoup::prelude::{RtpCodecParametersParameters, WorkerSettings};
@@ -10,8 +10,8 @@ use mediasoup::router::{Router, RouterOptions};
 use mediasoup::rtp_parameters::{MimeTypeAudio, MimeTypeVideo, RtpCodecCapability};
 use mediasoup::worker::{Worker, WorkerId};
 use mediasoup::worker_manager::WorkerManager;
-use subxt::{Config, SubstrateConfig};
-use tokio::sync::Mutex;
+use tokio::sync::{Mutex, RwLock};
+use tokio::time::timeout;
 use tokio_tungstenite::tungstenite::Message;
 
 use crate::stream_types::StreamInfo;
@@ -19,20 +19,15 @@ use crate::user::User;
 
 lazy_static! {
     static ref ROOM_MANAGER: Arc<RoomManager> = {
-        let runtime = tokio::runtime::Runtime::new().unwrap();
-        let manager = runtime.block_on(async {
-            RoomManager::create()
-                .await
-                .expect("Failed to create RoomManager")
-        });
+        let manager = RoomManager::new();
         Arc::new(manager)
     };
 }
 
 pub struct Room {
-    pub(crate) teacher: <SubstrateConfig as Config>::AccountId,
+    pub(crate) teacher: String,
     pub(crate) name: String,
-    pub(crate) users: Vec<Arc<Mutex<User>>>,
+    pub(crate) users: RwLock<Vec<Arc<Mutex<User>>>>,
     // each room has its own router
     router: Router,
     // Track all active streams in the room
@@ -46,7 +41,7 @@ pub struct Room {
 }
 
 pub struct RoomManager {
-    pub(crate) rooms: Mutex<HashMap<u32, Room>>,
+    pub(crate) rooms: RwLock<HashMap<u32, Room>>,
     worker_manager: WorkerManager,
     worker_pool: Mutex<Vec<Worker>>,
     room_to_worker: Mutex<HashMap<u32, WorkerId>>,
@@ -67,16 +62,15 @@ impl RoomManager {
 
     fn new() -> Self {
         RoomManager {
-            rooms: Mutex::new(HashMap::new()),
+            rooms: RwLock::new(HashMap::new()),
             worker_pool: Mutex::new(vec![]),
             worker_manager: WorkerManager::new(),
             room_to_worker: Mutex::new(HashMap::new()),
         }
     }
-    pub async fn create() -> Result<Self, Box<dyn Error>> {
-        let manager = Self::new();
-        manager.initialize_workers().await?;
-        Ok(manager)
+    pub async fn initialize(&self) -> Result<(), Box<dyn Error>> {
+        self.initialize_workers().await?;
+        Ok(())
     }
     pub fn instance() -> Arc<RoomManager> {
         ROOM_MANAGER.clone()
@@ -99,92 +93,114 @@ impl RoomManager {
 
     pub async fn add_room_from_contract(
         &self,
-        teacher: <SubstrateConfig as Config>::AccountId,
+        teacher: String,
         course_id: u32,
-        name: String,
-    ) -> Result<(), Box<dyn Error>> {
+        course_name: String,
+    ) -> Result<u32, Box<dyn Error>> {
+        // Acquire a worker from the pool with the least load.
         let worker = self.get_least_loaded_worker().await?;
+        let router = worker
+            .create_router(RouterOptions::new(vec![
+                RtpCodecCapability::Audio {
+                    mime_type: MimeTypeAudio::Opus,
+                    preferred_payload_type: None,
+                    clock_rate: NonZeroU32::new(48000).unwrap(),
+                    channels: NonZeroU8::new(2).unwrap(),
+                    parameters: RtpCodecParametersParameters::default(),
+                    rtcp_feedback: vec![],
+                },
+                RtpCodecCapability::Video {
+                    mime_type: MimeTypeVideo::H264,
+                    preferred_payload_type: None,
+                    clock_rate: NonZeroU32::new(90000).unwrap(),
+                    parameters: RtpCodecParametersParameters::default(),
+                    rtcp_feedback: vec![],
+                },
+            ]))
+            .await?;
 
-        let router_options = RouterOptions::new(vec![
-            RtpCodecCapability::Audio {
-                mime_type: MimeTypeAudio::Opus,
-                preferred_payload_type: None,
-                clock_rate: NonZeroU32::new(48000).unwrap(),
-                channels: NonZeroU8::new(2).unwrap(),
-                parameters: RtpCodecParametersParameters::default(),
-                rtcp_feedback: vec![],
-            },
-            RtpCodecCapability::Video {
-                mime_type: MimeTypeVideo::Vp8,
-                preferred_payload_type: None,
-                clock_rate: NonZeroU32::new(90000).unwrap(),
-                parameters: RtpCodecParametersParameters::default(),
-                rtcp_feedback: vec![],
-            },
-        ]);
+        // Create a new Room instance.
+        let room = Room {
+            teacher: teacher.clone(),
+            name: course_name.clone(),
+            users: RwLock::new(vec![]),
+            router,
+            active_streams: Default::default(),
+            spatial_grid: HashMap::new(),
+        };
 
-        let router = worker.create_router(router_options).await?;
+        // Lock and modify the rooms map.
+        let mut rooms = self.rooms.write().await;
+        rooms.insert(course_id, room);
 
-        let mut rooms = self.rooms.lock().await;
-        rooms.insert(
-            course_id,
-            Room {
-                teacher,
-                name,
-                users: vec![],
-                router,
-                active_streams: Default::default(),
-                spatial_grid: Default::default(),
-            },
-        );
-        self.room_to_worker
-            .lock()
-            .await
-            .insert(course_id, worker.id());
+        // Track room-worker association.
+        let mut room_to_worker = self.room_to_worker.lock().await;
+        room_to_worker.insert(course_id, worker.id());
 
-        Ok(())
+        Ok(course_id)
     }
+
     pub(crate) async fn add_user_to_room(&self, room_id: u32, user: Arc<Mutex<User>>) {
-        if let Some(room) = self.rooms.lock().await.get_mut(&room_id) {
-            room.users.push(user);
-        }
-    }
-    pub(crate) async fn remove_user_from_room(&self, room_id: u32, user_id: String) {
-        let mut rooms = self.rooms.lock().await;
+        let mut rooms = self.rooms.write().await; // Use write lock for rooms
         if let Some(room) = rooms.get_mut(&room_id) {
-            let mut i = 0;
-            while i < room.users.len() {
-                let should_remove = {
-                    let user_lock = room.users[i].lock().await;
-                    user_lock.id == Some(user_id.clone())
-                };
-                if should_remove {
-                    room.users.remove(i);
-                } else {
-                    i += 1;
-                }
-            }
+            let mut users = room.users.write().await; // Use write lock for users
+            users.push(user);
         }
     }
 
+    pub(crate) async fn remove_user_from_room(&self, room_id: u32, user_id: String) {
+        let mut rooms = self.rooms.write().await;
+        if let Some(room) = rooms.get_mut(&room_id) {
+            let mut users = room.users.write().await;
+            users.retain(|user| {
+                let user_lock = futures::executor::block_on(user.lock());
+                user_lock.id.as_ref() != Some(&user_id)
+            });
+        }
+    }
+
+
+}
+
+impl RoomManager {
     pub(crate) async fn broadcast_message(
         &self,
         sender_id: Option<String>,
         room_id: u32,
         message: String,
     ) {
-        let rooms = self.rooms.lock().await;
-        if let Some(room) = rooms.get(&room_id) {
-            for user in &room.users {
-                let mut user_lock = user.lock().await;
-                if user_lock.id != sender_id {
-                    user_lock
-                        .websocket
-                        .send(Message::Text(message.clone()))
-                        .await
-                        .expect("Error sending message");
+        let users = {
+            let rooms = self.rooms.read().await;
+            if let Some(room) = rooms.get(&room_id) {
+                room.users.read().await.clone()
+            } else {
+                println!("Room {} not found", room_id);
+                return;
+            }
+        };
+
+        for user in users {
+            match timeout(Duration::from_secs(5), user.lock()).await {
+                Ok(mut user_lock) => {
+                    let should_send = user_lock.id.as_ref()
+                        .map(|user_id| sender_id.as_ref() != Some(user_id))
+                        .unwrap_or(false);
+
+                    if should_send {
+                        if let Err(e) = user_lock.websocket.send(Message::Text(message.clone())).await {
+                            if let Some(user_id) = &user_lock.id {
+                                eprintln!("Failed to broadcast message to user {}: {}", user_id, e);
+                            } else {
+                                eprintln!("Failed to broadcast message to a user: {}", e);
+                            }
+                        }
+                    }
+                },
+                Err(_) => {
+                    eprintln!("Failed to acquire lock for a user in room {} within timeout", room_id);
                 }
             }
         }
     }
+
 }

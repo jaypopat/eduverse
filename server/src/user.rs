@@ -13,13 +13,13 @@ use serde::{Deserialize, Serialize};
 use sp_core::{sr25519, ByteArray, Pair};
 use tokio::net::TcpStream;
 use tokio::sync::Mutex;
+use tokio_tungstenite::tungstenite::Message;
 use tokio_tungstenite::WebSocketStream;
 
 use crate::room_manager::RoomManager;
 use crate::ws_payload::{
     ConsumePayload, JoinPayload, MovementPayload, ProducePayload, ResumePayload, TransportOptions,
 };
-
 pub struct User {
     pub(crate) id: Option<String>,
     room_id: Option<u32>,
@@ -60,7 +60,7 @@ enum UserAction {
     Resume(ResumePayload), // if the user paused a video to focus on audio-only, Resume would let them start receiving the video stream again.
 }
 impl User {
-    pub fn new(websocket: WebSocketStream<TcpStream>) -> Self {
+    pub fn new(mut websocket: WebSocketStream<TcpStream>) -> Self {
         User {
             id: None,
             room_id: None,
@@ -127,11 +127,11 @@ impl User {
         }
     }
     async fn join_room(user_arc: Arc<Mutex<Self>>, payload: JoinPayload) {
+        print!("Joining room");
         if !RoomManager::instance()
             .rooms
-            .lock()
-            .await
-            .contains_key(&payload.course_id)
+            .read()
+            .await.contains_key(&payload.course_id)
         {
             return;
         }
@@ -142,12 +142,12 @@ impl User {
             payload.signature,
             payload.message_signed,
         );
-
-        // Verify the signature
-        if let Err(e) = verify_signature(pub_address.clone(), signature, message_signed) {
-            eprintln!("Signature verification failed: {}", e);
-            return;
-        }
+        //
+        // // Verify the signature
+        // if let Err(e) = verify_signature(pub_address.clone(), signature, message_signed) {
+        //     eprintln!("Signature verification failed: {}", e);
+        //     return;
+        // }
 
         // TODO check if user is enrolled by calling is_enrolled view function in smart contract
         // const isEnrolled = contract.query.isEnrolled(course_id, pub_address);
@@ -163,6 +163,8 @@ impl User {
         RoomManager::instance()
             .add_user_to_room(payload.course_id, user_arc.clone())
             .await;
+        println!("User added to room");
+        println!("{:?} {:?} {:?}", user.id, user.room_id, user.coordinates);
 
         let join_message = serde_json::json!({
             "type": "user_joined",
@@ -173,6 +175,7 @@ impl User {
         RoomManager::instance()
             .broadcast_message(user.id.clone(), course_id, join_message.to_string())
             .await;
+        print!("broadcasted to everyone");
     }
     async fn handle_leave_room(user_arc: Arc<Mutex<Self>>) {
         let (room_id, user_id) = {
@@ -305,13 +308,13 @@ fn get_rand_coordinates() -> (i32, i32) {
     let mut rng = rand::thread_rng();
     (rng.gen_range(0..100), rng.gen_range(0..100))
 }
-impl Drop for User {
-    fn drop(&mut self) {
-        self.producers.clear();
-        self.consumers.clear();
-
-        if let Some(mut transport) = self.transport.take() {
-            let _ = transport.close();
-        }
-    }
-}
+// impl Drop for User {
+//     fn drop(&mut self) {
+//         self.producers.clear();
+//         self.consumers.clear();
+//
+//         if let Some(mut transport) = self.transport.take() {
+//             let _ = transport.close();
+//         }
+//     }
+// }
