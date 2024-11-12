@@ -202,5 +202,4 @@ impl RoomManager {
             }
         }
     }
-
 }
